@@ -1,8 +1,5 @@
 
-const defaultUsers = [
-    { userId: 1, userName: "john_doe", password: "Pass@123", email: "john@example.com", phone: "9876543210", role: "Customer" },
-    { userId: 2, userName: "bank_emp1", password: "Emp@123", email: "emp@bank.com", phone: "9876543211", role: "BankEmployee" }
-];
+const defaultUsers = [];
 
 const defaultApps = [
     {
