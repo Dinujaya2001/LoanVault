@@ -1,9 +1,7 @@
-// ============================================
-// API & Application Configuration
-// ============================================
+
 const CONFIG = {
-    // Replace with your actual deployment/local domain
-    BASE_URL: 'https://your-api-domain.com',
+    
+    BASE_URL: 'https://api.freeapi.app',
     API_PATH: '/api/BankLoan',
 
     get API_URL() {
