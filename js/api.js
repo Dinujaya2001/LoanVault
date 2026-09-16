@@ -51,6 +51,26 @@ if (!localStorage.getItem('bank_loan_db_applications')) saveStoredApps(defaultAp
 
 const BankLoanAPI = {
     
+    assignToOfficer: async (applicationId, bankEmployeeId) => {
+        if (CONFIG.USE_LOCAL_MOCK_API) {
+            const apps = getStoredApps();
+            const index = apps.findIndex(a => (a.applicationId || a.id) === Number(applicationId));
+            if (index !== -1) {
+                apps[index].assignedEmployeeId = Number(bankEmployeeId);
+                saveStoredApps(apps);
+                return { result: true, message: `Application #${applicationId} assigned to you!`, data: apps[index] };
+            }
+            return { result: false, message: "Application not found.", data: null };
+        }
+
+        const res = await fetch(`${CONFIG.API_URL}/AssignApplication`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ applicationId, bankEmployeeId })
+        });
+        return await res.json();
+    },
+    
     registerCustomer: async (customerData) => {
         if (CONFIG.USE_LOCAL_MOCK_API) {
             const users = getStoredUsers();
@@ -100,6 +120,8 @@ const BankLoanAPI = {
             body: JSON.stringify(employeeData)
         });
         return await res.json();
+
+        
     },
 
     
