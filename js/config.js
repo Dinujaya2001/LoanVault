@@ -1,7 +1,9 @@
 
 const CONFIG = {
     
-    BASE_URL: 'https://api.freeapi.app',
+    USE_LOCAL_MOCK_API: true,
+    
+    BASE_URL: 'https://your-api-domain.com',
     API_PATH: '/api/BankLoan',
 
     get API_URL() {
