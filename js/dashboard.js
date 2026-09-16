@@ -22,7 +22,7 @@ async function loadAnalytics(customerId) {
     document.getElementById('statPending').innerText = pending;
     document.getElementById('statApproved').innerText = approved;
 
-    // Render Status Donut Chart
+    
     const ctxStatus = document.getElementById('statusChart').getContext('2d');
     new Chart(ctxStatus, {
         type: 'doughnut',
@@ -43,7 +43,7 @@ async function loadAnalytics(customerId) {
         }
     });
 
-    // Render Income Bar Chart (in LKR)
+    
     const ctxIncome = document.getElementById('incomeChart').getContext('2d');
     const appLabels = apps.map(a => `#${a.applicationId || a.id}`);
     const incomes = apps.map(a => a.annualIncome || 0);

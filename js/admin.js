@@ -3,7 +3,7 @@ let selectedApp = null;
 let reviewModalInstance = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Auth Check
+    
     if (typeof checkAuth === 'function') {
         checkAuth(USER_ROLES.BANK_EMPLOYEE);
     } else if (typeof requireAuth === 'function') {
@@ -98,7 +98,7 @@ function openReviewModal(appId) {
 
     document.getElementById('modalTitle').innerText = `Application #${appId} - ${selectedApp.fullName}`;
 
-    // Underwriting Rule Engine
+    
     const issues = [];
     const merits = [];
 

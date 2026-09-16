@@ -1,60 +1,97 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    checkAuth(USER_ROLES.CUSTOMER);
+   
+    if (typeof checkAuth === 'function') {
+        checkAuth(USER_ROLES.CUSTOMER);
+    } else if (typeof requireAuth === 'function') {
+        requireAuth(USER_ROLES.CUSTOMER);
+    }
+
     const user = getCurrentUser();
-    await loadCustomerApplications(user.userId || user.customerId || user.id);
+    if (!user) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    const customerId = user.userId || user.customerId || user.id;
+    await fetchMyApplications(customerId);
 });
 
-async function loadCustomerApplications(customerId) {
-    const tbody = document.getElementById('applicationsTableBody');
-    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Loading your applications...</td></tr>';
+function getTableBody() {
+    return document.getElementById('appsTableBody') || document.getElementById('applicationsTableBody');
+}
+
+async function fetchMyApplications(customerId) {
+    const tbody = getTableBody();
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-white">Loading your applications...</td></tr>';
 
     const res = await BankLoanAPI.getMyApplications(customerId);
+    let apps = (res && Array.isArray(res.data)) ? res.data : [];
 
-    if (res.result && Array.isArray(res.data) && res.data.length > 0) {
-        tbody.innerHTML = res.data.map(app => `
-            <tr>
-                <td class="fw-semibold">#${app.applicationId || app.id || '-'}</td>
-                <td>${app.fullName || '-'}</td>
-                <td>${app.panCard || '-'}</td>
-                <td>$${Number(app.annualIncome || 0).toLocaleString()}</td>
-                <td><span class="badge ${getStatusBadge(app.applicationStatus || app.status)}">${app.applicationStatus || app.status || 'Pending'}</span></td>
-                <td>${app.dateOfBirth ? new Date(app.dateOfBirth).toLocaleDateString() : '-'}</td>
-            </tr>
-        `).join('');
+  
+    if (apps.length === 0 && CONFIG.USE_LOCAL_MOCK_API) {
+        const allStored = (typeof getStoredApps === 'function') ? getStoredApps() : [];
+        if (allStored.length > 0) {
+            apps = allStored;
+        }
+    }
+
+    if (apps.length > 0) {
+        tbody.innerHTML = apps.map(app => {
+            const appId = app.applicationId || app.id || '-';
+            const status = app.applicationStatus || app.status || 'Pending';
+            const income = Number(app.annualIncome || 0).toLocaleString();
+            const dob = app.dateOfBirth ? new Date(app.dateOfBirth).toLocaleDateString() : '-';
+
+            return `
+                <tr>
+                    <td class="fw-bold" style="color: #2dd4bf !important;">#${appId}</td>
+                    <td class="text-white">${app.fullName || '-'}</td>
+                    <td><code>${app.panCard || '-'}</code></td>
+                    <td class="fw-bold text-success">LKR ${income}</td>
+                    <td><span class="badge ${getStatusBadge(status)}">${status}</span></td>
+                    <td class="text-white">${dob}</td>
+                </tr>
+            `;
+        }).join('');
     } else {
         tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No loan applications found.</td></tr>';
     }
 }
 
 function getStatusBadge(status) {
-    if (!status) return 'bg-secondary';
+    if (!status) return 'bg-secondary text-white';
     switch (status.toLowerCase()) {
-        case 'approved': return 'badge-status-approved';
-        case 'rejected': return 'badge-status-rejected';
-        case 'pending': return 'badge-status-pending';
-        default: return 'bg-info text-dark';
+        case 'approved': return 'badge-approved';
+        case 'rejected': return 'badge-rejected';
+        case 'pending': return 'badge-pending';
+        default: return 'bg-secondary text-white';
     }
 }
 
-async function handleCheckStatusByPan(event) {
+async function handlePanStatusSearch(event) {
     event.preventDefault();
     const pan = document.getElementById('searchPan').value.trim();
     const status = document.getElementById('searchStatus').value;
-    const resultBox = document.getElementById('searchResultBox');
+    const output = document.getElementById('searchOutput');
 
-    resultBox.innerHTML = '<div class="spinner-border spinner-border-sm text-primary"></div> Checking...';
+    if (!output) return;
+    output.innerHTML = '<div class="spinner-border spinner-border-sm text-info mt-3"></div> Checking status...';
 
     const res = await BankLoanAPI.checkApplicationStatus(pan, status);
     if (res.result && res.data) {
-        resultBox.innerHTML = `
-            <div class="alert alert-success mt-2 mb-0">
-                <strong>Found:</strong> Status for PAN <code>${pan}</code> is <strong>${status}</strong>.
+        output.innerHTML = `
+            <div class="alert alert-success mt-3 mb-0 small bg-opacity-25 border">
+                <i class="bi bi-check-circle-fill me-1"></i>
+                <strong>Record Verified:</strong> Application with PAN / NIC <code>${pan}</code> holds <strong>${status}</strong> status.
             </div>
         `;
     } else {
-        resultBox.innerHTML = `
-            <div class="alert alert-warning mt-2 mb-0">
-                ${res.message || 'No matching record found for the provided PAN and Status.'}
+        output.innerHTML = `
+            <div class="alert alert-warning mt-3 mb-0 small bg-opacity-25 border">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                ${res.message || 'No matching application found for provided criteria.'}
             </div>
         `;
     }

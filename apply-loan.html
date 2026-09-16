@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
         <div class="container-fluid px-4">
@@ -39,11 +41,13 @@
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <label class="form-label">Full Legal Name *</label>
-                                <input type="text" id="fullName" class="form-control" placeholder="e.g. K. D. Perera" required>
+                                <input type="text" id="fullName" class="form-control" placeholder="e.g. K. D. Perera"
+                                    required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">NIC / PAN Card Number *</label>
-                                <input type="text" id="panCard" class="form-control" placeholder="e.g. 200012345678 or ABCDE1234F" required>
+                                <input type="text" id="panCard" class="form-control"
+                                    placeholder="e.g. 200012345678 or ABCDE1234F" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Date of Birth *</label>
@@ -71,7 +75,8 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Province / State *</label>
-                                <input type="text" id="state" class="form-control" placeholder="Western Province" required>
+                                <input type="text" id="state" class="form-control" placeholder="Western Province"
+                                    required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Postal Code *</label>
@@ -81,44 +86,56 @@
 
                         <h6 class="text-info fw-bold mb-3">3. Financial & CRIB Profile</h6>
                         <div class="row g-3 mb-4">
+                            
                             <div class="col-md-6">
                                 <label class="form-label">Annual Income (LKR - රුපියල්) *</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-dark text-info border-secondary">LKR</span>
-                                    <input type="number" id="annualIncome" class="form-control" placeholder="e.g. 1500000" min="0" required>
+                                    <input type="number" id="annualIncome" class="form-control"
+                                        placeholder="e.g. 1500000" min="0" required
+                                        oninput="autoCalculateCreditScore()">
                                 </div>
+                                <small class="text-muted" style="font-size: 0.75rem;">ආදායම අනුව Credit Score එක
+                                    auto-set වේ</small>
                             </div>
+
+                            
                             <div class="col-md-6">
                                 <label class="form-label">Employment Status *</label>
-                                <select id="employmentStatus" class="form-select" required>
+                                <select id="employmentStatus" class="form-select" required
+                                    onchange="autoCalculateCreditScore()">
                                     <option value="Employed">Permanent Government / Private</option>
-                                    <option value="Self-Employed">Self-Employed / Freelancer</option>
                                     <option value="Business">Registered Business Owner</option>
+                                    <option value="Self-Employed">Self-Employed / Freelancer</option>
                                     <option value="Other">Other / Retired</option>
                                 </select>
                             </div>
 
-                            <!-- Interactive Credit Score Slider -->
+                           
                             <div class="col-12">
                                 <div class="p-3 rounded border border-secondary" style="background: #041a1d;">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <label class="form-label mb-0">CRIB / Credit Score (300 - 850)</label>
                                         <span class="badge bg-primary fs-6" id="scoreDisplay">700 - Good</span>
                                     </div>
-                                    <small class="text-muted d-block mb-2">බැංකු ණය අනුමත වීමේ හැකියාව තීරණය වන CRIB ලකුණු මට්ටම</small>
-                                    <input type="range" class="form-range" id="creditScore" min="300" max="850" value="700" oninput="updateScoreBadge(this.value)">
+                                    <small class="text-muted d-block mb-2">බැංකු ණය අනුමත වීමේ හැකියාව තීරණය වන CRIB
+                                        ලකුණු මට්ටම</small>
+                                    <input type="range" class="form-range" id="creditScore" min="300" max="850"
+                                        value="700" oninput="updateScoreBadge(this.value)">
                                 </div>
                             </div>
 
                             <div class="col-12">
                                 <label class="form-label">Declared Assets / Collateral</label>
-                                <input type="text" id="assets" class="form-control" placeholder="e.g. Land deed, Vehicle permit, Fixed deposits">
+                                <input type="text" id="assets" class="form-control"
+                                    placeholder="e.g. Land deed, Vehicle permit, Fixed deposits">
                             </div>
                         </div>
 
                         <div class="d-flex justify-content-end gap-2">
                             <a href="dashboard.html" class="btn btn-outline-light px-4">Cancel</a>
-                            <button type="submit" id="submitBtn" class="btn btn-success px-4">Submit Application</button>
+                            <button type="submit" id="submitBtn" class="btn btn-success px-4">Submit
+                                Application</button>
                         </div>
                     </form>
                 </div>
@@ -144,6 +161,76 @@
             el.className = `badge ${bg} fs-6`;
             el.innerText = `${val} - ${rating}`;
         }
+        
+function updateScoreBadge(val) {
+    const el = document.getElementById('scoreDisplay');
+    if (!el) return;
+
+    let rating = 'Fair';
+    let bg = 'bg-warning text-dark';
+
+    if (val >= 780) {
+        rating = 'Excellent (Prime Tier)';
+        bg = 'bg-success';
+    } else if (val >= 680) {
+        rating = 'Good (Eligible)';
+        bg = 'bg-info text-dark';
+    } else if (val >= 550) {
+        rating = 'Moderate Risk';
+        bg = 'bg-warning text-dark';
+    } else {
+        rating = 'High Risk (Low Score)';
+        bg = 'bg-danger text-white';
+    }
+
+    el.className = `badge ${bg} fs-6`;
+    el.innerText = `${val} - ${rating}`;
+}
+
+
+function autoCalculateCreditScore() {
+    const income = parseFloat(document.getElementById('annualIncome').value) || 0;
+    const employment = document.getElementById('employmentStatus').value;
+    const slider = document.getElementById('creditScore');
+
+    if (!slider) return;
+
+    
+    let calculatedScore = 400;
+
+   
+    if (income >= 5000000) {
+        calculatedScore += 330; 
+    } else if (income >= 3000000) {
+        calculatedScore += 270; 
+    } else if (income >= 1800000) {
+        calculatedScore += 210; 
+    } else if (income >= 1200000) {
+        calculatedScore += 160; 
+    } else if (income >= 600000) {
+        calculatedScore += 100; 
+    } else if (income > 0) {
+        calculatedScore += 40;  
+    }
+
+    
+    if (employment === 'Employed') {
+        calculatedScore += 60;
+    } else if (employment === 'Business') {
+        calculatedScore += 40;
+    } else if (employment === 'Self-Employed') {
+        calculatedScore += 20;
+    }
+
+    
+    if (calculatedScore > 850) calculatedScore = 850;
+    if (calculatedScore < 300) calculatedScore = 300;
+
+    
+    slider.value = calculatedScore;
+    updateScoreBadge(calculatedScore);
+}
     </script>
 </body>
+
 </html>
