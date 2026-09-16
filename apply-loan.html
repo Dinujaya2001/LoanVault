@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply for Loan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="customer-dashboard.html">🏦 Bank Loan</a>
+            <div class="ms-auto">
+                <a href="customer-dashboard.html" class="btn btn-outline-light btn-sm">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white">
+                        <h4 class="mb-0 fw-bold">📝 New Loan Application</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="alertBox"></div>
+
+                        <form id="loanForm">
+                            
+                            <h6 class="text-primary fw-bold mb-3">Personal Information</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Full Name *</label>
+                                    <input type="text" class="form-control" id="fullName" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">PAN Card *</label>
+                                    <input type="text" class="form-control" id="panCard" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Date of Birth *</label>
+                                    <input type="date" class="form-control" id="dateOfBirth" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Phone *</label>
+                                    <input type="tel" class="form-control" id="phone" pattern="[0-9]{10}" required>
+                                </div>
+                            </div>
+
+                            
+                            <h6 class="text-primary fw-bold mb-3 mt-3">Address</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Address</label>
+                                    <input type="text" class="form-control" id="address">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">City</label>
+                                    <input type="text" class="form-control" id="city">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">State</label>
+                                    <input type="text" class="form-control" id="state">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Zip Code</label>
+                                    <input type="text" class="form-control" id="zipCode">
+                                </div>
+                            </div>
+
+                           
+                            <h6 class="text-primary fw-bold mb-3 mt-3">Financial Information</h6>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Annual Income *</label>
+                                    <input type="number" class="form-control" id="annualIncome" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Employment Status</label>
+                                    <select class="form-select" id="employmentStatus">
+                                        <option value="">Select...</option>
+                                        <option>Employed</option>
+                                        <option>Self-Employed</option>
+                                        <option>Unemployed</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Credit Score</label>
+                                    <input type="number" class="form-control" id="creditScore" min="300" max="900">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Assets Description</label>
+                                <textarea class="form-control" id="assets" rows="2" 
+                                          placeholder="e.g., House, Car, Gold..."></textarea>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-2 mt-4">
+                                <a href="customer-dashboard.html" class="btn btn-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="bi bi-send"></i> Submit Application
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        const user = requireAuth();
+
+        document.getElementById('loanForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const payload = {
+                fullName: document.getElementById('fullName').value,
+                panCard: document.getElementById('panCard').value,
+                dateOfBirth: document.getElementById('dateOfBirth').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                state: document.getElementById('state').value,
+                zipCode: document.getElementById('zipCode').value,
+                annualIncome: parseFloat(document.getElementById('annualIncome').value),
+                employmentStatus: document.getElementById('employmentStatus').value,
+                creditScore: parseInt(document.getElementById('creditScore').value) || 0,
+                assets: document.getElementById('assets').value,
+                customerId: user.customerId || user.userId || user.id,
+                status: 'Pending'
+            };
+
+            const res = await apiPost('/BankLoan/AddNewApplication', payload);
+
+            if (res.result) {
+                showAlert('success', '✅ Application submitted successfully!');
+                setTimeout(() => window.location.href = 'customer-dashboard.html', 1500);
+            } else {
+                showAlert('danger', res.message || 'Submission failed');
+            }
+        });
+    </script>
+</body>
+</html>
