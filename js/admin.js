@@ -1,41 +1,63 @@
 document.addEventListener('DOMContentLoaded', async () => {
     checkAuth(USER_ROLES.BANK_EMPLOYEE);
     const user = getCurrentUser();
-    document.getElementById('empName').innerText = user.userName || 'Employee';
+    if (document.getElementById('empName')) {
+        document.getElementById('empName').innerText = user.userName || 'Employee';
+    }
 
     await loadAllApplications();
 });
 
 async function loadAllApplications() {
-    const tbody = document.getElementById('adminAppTableBody');
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">Fetching all bank applications...</td></tr>';
+    const btnAll = document.getElementById('btnAll');
+    const btnAssigned = document.getElementById('btnAssigned');
+    if (btnAll) btnAll.classList.add('active');
+    if (btnAssigned) btnAssigned.classList.remove('active');
+
+    const tbody = getTableBody();
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">Fetching all bank applications...</td></tr>';
 
     const res = await BankLoanAPI.getAllApplications();
 
     if (res.result && Array.isArray(res.data)) {
         renderTable(res.data);
     } else {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">${res.message || 'No applications available.'}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">${res.message || 'No applications available.'}</td></tr>`;
     }
 }
 
 async function loadAssignedToMe() {
+    const btnAll = document.getElementById('btnAll');
+    const btnAssigned = document.getElementById('btnAssigned');
+    if (btnAll) btnAll.classList.remove('active');
+    if (btnAssigned) btnAssigned.classList.add('active');
+
     const user = getCurrentUser();
     const empId = user.userId || user.id;
-    const tbody = document.getElementById('adminAppTableBody');
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">Fetching assigned applications...</td></tr>';
+    const tbody = getTableBody();
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">Fetching assigned applications...</td></tr>';
 
     const res = await BankLoanAPI.getAssignedApplications(empId);
 
     if (res.result && Array.isArray(res.data)) {
         renderTable(res.data);
     } else {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">${res.message || 'No assigned applications found.'}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">${res.message || 'No assigned applications found.'}</td></tr>`;
     }
 }
 
+function getTableBody() {
+    return document.getElementById('adminAppTableBody') || document.getElementById('adminTableBody');
+}
+
 function renderTable(apps) {
-    const tbody = document.getElementById('adminTableBody');
+    const tbody = getTableBody();
+    if (!tbody) return;
+
     if (!apps || apps.length === 0) {
         tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">No records found.</td></tr>';
         return;
@@ -49,12 +71,12 @@ function renderTable(apps) {
         return `
             <tr>
                 <td class="fw-bold">#${appId}</td>
-                <td>${app.fullName}</td>
-                <td><code>${app.panCard}</code></td>
-                <td>${app.employmentStatus}</td>
-                <td><span class="badge bg-secondary">${app.creditScore}</span></td>
+                <td>${app.fullName || '-'}</td>
+                <td><code>${app.panCard || '-'}</code></td>
+                <td>${app.employmentStatus || '-'}</td>
+                <td><span class="badge bg-secondary">${app.creditScore || 'N/A'}</span></td>
                 <td>$${Number(app.annualIncome || 0).toLocaleString()}</td>
-                <td><span class="badge ${getStatusClass(status)}">${status}</span></td>
+                <td><span class="badge ${getStatusBadge(status)}">${status}</span></td>
                 <td class="text-center">
                     ${isPending ? `
                         <button class="btn btn-success btn-sm me-1" onclick="changeStatus(${appId}, 'Approved')">
@@ -81,7 +103,8 @@ async function changeStatus(appId, newStatus) {
     if (res.result) {
         alert(res.message);
         
-        if (document.getElementById('btnAssigned').classList.contains('active')) {
+        const btnAssigned = document.getElementById('btnAssigned');
+        if (btnAssigned && btnAssigned.classList.contains('active')) {
             await loadAssignedApplications();
         } else {
             await loadAllApplications();
